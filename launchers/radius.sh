@@ -13,9 +13,7 @@ dt-launchfile-init
 # NOTE: Use `dt-exec COMMAND` to run the main process (blocking process)
 
 # launching app
-roslaunch wheel-encoder-odometry wheel-encoder-odometry.launch veh:=$VEHICLE_NAME
-# uncomment this one and comment out the roslaunch above for wheel radius estimation
-# roslaunch wheel-encoder-odometry wheel-radius-estimation.launch veh:=$VEHICLE_NAME distance:=1
+roslaunch wheel-encoder-odometry wheel-radius-estimation.launch veh:=$VEHICLE_NAME distance:=1
 
 
 # ----------------------------------------------------------------------------

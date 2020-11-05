@@ -22,7 +22,7 @@ class WheelEncoderOdometryNode(DTROS):
         self._radius = rospy.get_param(f'/{self.veh_name}/kinematics_node/radius', 100)
 
         # Integrated distance
-        self.encoder_ticks = [0, 0]
+        self.encoder_ticks = [None, None]
         self.distance_wheels = [0, 0]
         self.velocity_wheels = [0, 0]
 
@@ -40,23 +40,28 @@ class WheelEncoderOdometryNode(DTROS):
         self.log("Initialized")
 
     def cb_encoder_data(self, msg, args):
-
+        
         index_wheel = args[0]
-        ticks_difference = msg.data - self.encoder_ticks[index_wheel]
-
-        if self.velocity_wheels[index_wheel] >= 0:
-            self.distance_wheels[index_wheel] += 2*pi*self._radius*ticks_difference/msg.resolution
+        if self.encoder_ticks[index_wheel] is None:
+            self.encoder_ticks[index_wheel] = msg.data
         else:
-            self.distance_wheels[index_wheel] -= 2*pi*self._radius*ticks_difference/msg.resolution
+            ticks_difference = msg.data - self.encoder_ticks[index_wheel]
 
-        self.encoder_ticks[index_wheel] = msg.data
+            if self.velocity_wheels[index_wheel] >= 0:
+                self.distance_wheels[index_wheel] += 2*pi*self._radius*ticks_difference/msg.resolution
+            else:
+                self.distance_wheels[index_wheel] -= 2*pi*self._radius*ticks_difference/msg.resolution
+
+            self.encoder_ticks[index_wheel] = msg.data
     
     def run(self):
         # publish message every 1 second
         rate = rospy.Rate(30) # 30Hz
         while not rospy.is_shutdown():
-            self.pub_integrated_distance_left.publish(self.distance_wheels[0])
-            self.pub_integrated_distance_right.publish(self.distance_wheels[1])
+            if self.distance_wheels[0] is not None:
+                self.pub_integrated_distance_left.publish(self.distance_wheels[0])
+            if self.distance_wheels[1] is not None:
+                self.pub_integrated_distance_right.publish(self.distance_wheels[1])
             rate.sleep()
 
     def cb_executed_commands(self, msg):
@@ -65,7 +70,7 @@ class WheelEncoderOdometryNode(DTROS):
         self.velocity_wheels = [msg.vel_left, msg.vel_right]
 
 if __name__ == '__main__':
-    node = WheelEncoderOdometryNode(node_name='my_odometry_node')
+    node = WheelEncoderOdometryNode(node_name='wheel_encoder_odometry')
     # Keep it spinning to keep the node alive
     node.run()
     

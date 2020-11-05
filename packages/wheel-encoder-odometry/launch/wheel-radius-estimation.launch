@@ -1,0 +1,5 @@
+<launch>
+  <group ns="$(arg veh)"> 
+    <node pkg="wheel-encoder-odometry" type="wheel-radius-estimation.py" name="wheel_radius_estimation" output="screen" args="$(arg distance)"/>
+  </group>
+</launch>
