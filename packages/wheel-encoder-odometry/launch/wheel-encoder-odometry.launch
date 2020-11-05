@@ -1,0 +1,5 @@
+<launch>
+  <group ns="$(arg veh)"> 
+    <node pkg="wheel-encoder-odometry" type="wheel-encoder-odometry.py" name="wheel_encoder_odometry" output="screen"/>
+  </group>
+</launch>
